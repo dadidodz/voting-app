@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    command: redis-server --requirepass mysecretpassword
+    ports:
+      - "6379:6379"
+
+  voting-app:
+    build: .
+    container_name: voting-app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - REDIS=redis
+      - REDIS_PWD=mysecretpassword
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
